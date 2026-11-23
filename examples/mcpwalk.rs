@@ -3,9 +3,9 @@
 //! resource by its template, and runs the same Gym episode every binding runs — through the agents'
 //! tools, over the wire — printed as JSON for sdk/python/tests/test_crosslang.py.
 //!
-//!     LOCALAPPDATA=<the serve's> cargo run -p bentrix-mcp-client --example mcpwalk
+//!     LOCALAPPDATA=<the serve's> cargo run -p bentrix --example mcpwalk
 
-use bentrix_mcp_client as mcp;
+use bentrix as mcp;
 use serde_json::{json, Value};
 
 fn check(held: bool, what: &str) -> Result<(), mcp::Error> {

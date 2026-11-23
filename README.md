@@ -12,18 +12,16 @@ Rust (stable), and Bentrix open on the same computer.
 
 ## Install
 
-The client is the crate `bentrix-mcp-client`. Add it to your `Cargo.toml`:
+The client is the crate `bentrix` on crates.io:
 
-```toml
-[dependencies]
-bentrix-mcp-client = { git = "https://github.com/bentrixhq/bentrix-rust" }
-serde_json = "1"
+```bash
+cargo add bentrix serde_json
 ```
 
 ## Connect
 
 ```rust
-use bentrix_mcp_client as mcp;
+use bentrix as mcp;
 
 fn main() -> Result<(), mcp::Error> {
     let b = mcp::connect(Some("my-agent"))?;
@@ -45,4 +43,4 @@ Every method, its arguments, the permission it needs and what it answers: **http
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE). It covers this source code only: Bentrix's engine library (`libbentrix`) and the Bentrix application are Bentrix's own, under their own terms.
+MIT — see [LICENSE](https://github.com/bentrixhq/bentrix-rust/blob/main/LICENSE). It covers this source code only: Bentrix's engine library (`libbentrix`) and the Bentrix application are Bentrix's own, under their own terms.

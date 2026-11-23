@@ -11,11 +11,11 @@
 //! lines: no TLS, no async runtime, `serde_json` the one dependency.
 //!
 //! ```no_run
-//! let b = bentrix_mcp_client::connect(Some("my-agent"))?;
-//! let state = b.workspace().get_state(bentrix_mcp_client::WorkspaceGetStateArgs::new())?;
+//! let b = bentrix::connect(Some("my-agent"))?;
+//! let state = b.workspace().get_state(bentrix::WorkspaceGetStateArgs::new())?;
 //! let bench = state["laboratories"][0]["benches"][0]["uri"].as_str().unwrap_or_default().to_string();
-//! let made = b.strategy().env_make(bentrix_mcp_client::StrategyEnvMakeArgs::new(bench).window(8))?;
-//! # Ok::<(), bentrix_mcp_client::Error>(())
+//! let made = b.strategy().env_make(bentrix::StrategyEnvMakeArgs::new(bench).window(8))?;
+//! # Ok::<(), bentrix::Error>(())
 //! ```
 
 use std::io::{Read, Write};
