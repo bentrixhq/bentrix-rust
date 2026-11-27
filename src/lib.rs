@@ -1,5 +1,5 @@
-//! **BENTRIX's MCP client for Rust**:
-//! every capability of a running BENTRIX over its Model Context Protocol endpoint. This file is the
+//! **Bentrix's MCP client for Rust**:
+//! every capability of a running Bentrix over its Model Context Protocol endpoint. This file is the
 //! hand-written half — the connection and everything that does not change when a capability is added;
 //! `generated.rs` is the rest, from the capability catalogue (`bentrix-capabilities` `rssdk`).
 //!
@@ -30,9 +30,13 @@ use serde_json::{json, Map, Value};
 #[rustfmt::skip]
 #[allow(clippy::new_without_default, clippy::too_many_arguments)]
 mod generated;
+#[rustfmt::skip]
+#[allow(clippy::new_without_default)]
+mod bench;
 pub mod forecast;
 pub mod output;
 pub use generated::*;
+pub use bench::*;
 
 pub const PROTOCOL_VERSION: &str = "2026-07-28";
 pub const CLIENT_NAME: &str = "bentrix-rust-sdk";
@@ -58,7 +62,7 @@ fn busy_wait(data: &Value) -> Duration {
     Duration::from_secs_f64(ms / 1000.0).min(BUSY_WAIT_MAX)
 }
 
-/// Why a call failed, in BENTRIX's own words where it gave them.
+/// Why a call failed, in Bentrix's own words where it gave them.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Error {
     /// A JSON-RPC error: the request itself was refused.
@@ -185,9 +189,28 @@ fn escape(s: &str) -> String {
     s.bytes().map(|b| if b.is_ascii_alphanumeric() || b"-_.~".contains(&b) { (b as char).to_string() } else { format!("%{b:02X}") }).collect()
 }
 
+/// **A workbench's address stands for its three parts**: `bench` given as a
+/// `bentrix://<home>/<owner>/bench/<name>` address fills `home`, `owner` and `bench`. Parts given as before are left
+/// as they are.
+fn from_address(mut values: Value) -> Value {
+    let parts: Option<Vec<String>> = values
+        .get("bench")
+        .and_then(Value::as_str)
+        .and_then(|s| s.strip_prefix("bentrix://"))
+        .map(|rest| rest.split('/').map(str::to_owned).collect());
+    if let (Some(p), Some(m)) = (parts, values.as_object_mut()) {
+        if p.len() >= 4 && p[2] == "bench" {
+            m.insert("home".into(), Value::from(p[0].clone()));
+            m.insert("owner".into(), Value::from(p[1].clone()));
+            m.insert("bench".into(), Value::from(p[3].clone()));
+        }
+    }
+    values
+}
+
 /// The RFC 6570 subset the catalogue uses: `{name}` and `{?a,b}`. A null optional is left out.
 fn expand_template(template: &str, vars: &Value) -> Result<String, Error> {
-    let values = plain(vars.clone());
+    let values = from_address(plain(vars.clone()));
     let mut out = String::new();
     let mut rest = template;
     while let Some(open) = rest.find('{') {
@@ -231,7 +254,7 @@ fn read_sse(text: &str, id: u64) -> Result<Value, Error> {
     Err(Error::Other("the stream ended without a response".into()))
 }
 
-/// **One BENTRIX endpoint**: every capability of its catalogue under `b.<domain>()`.
+/// **One Bentrix endpoint**: every capability of its catalogue under `b.<domain>()`.
 pub struct Client {
     pub url: String,
     pub catalogue_version: String,
@@ -504,7 +527,7 @@ impl Iterator for Watch<'_> {
     }
 }
 
-/// The folder BENTRIX writes its endpoint and secret into — `user_dir(Data, "agents")`, as the
+/// The folder Bentrix writes its endpoint and secret into — `user_dir(Data, "agents")`, as the
 /// application has it.
 pub fn agents_dir() -> PathBuf {
     if let Some(lad) = std::env::var_os("LOCALAPPDATA").filter(|v| !v.is_empty()) {
@@ -544,7 +567,7 @@ pub fn read_endpoint(folder: &Path) -> Result<String, Error> {
     Ok(url.to_string())
 }
 
-/// The secret BENTRIX wrote at its start.
+/// The secret Bentrix wrote at its start.
 pub fn read_secret(folder: &Path) -> Result<String, Error> {
     let secret = std::fs::read_to_string(folder.join(SECRET_FILE)).map_err(|_| Error::PairingRefused(format!("there is no readable {SECRET_FILE} in {}: Bentrix writes it at every start", folder.display())))?;
     let secret = secret.trim().to_string();

@@ -1,6 +1,6 @@
 [package]
 name = "bentrix"
-version = "0.1.382"
+version = "0.2.383"
 edition = "2021"
 license = "MIT"
 description = "The Rust client of Bentrix: every capability of a running Bentrix over its MCP endpoint, over loopback HTTP on std::net, serde_json its one dependency."
